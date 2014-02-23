@@ -36,6 +36,8 @@
 #include <cmath>
 #include <iostream>
 #include <string.h>
+#include <stdlib.h>
+
 
 #define DEG2RAD 0.017453293f
 

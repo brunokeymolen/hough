@@ -32,7 +32,9 @@
 //
 // **********************************************************************************
 
+#include <stdio.h>
 #include <dirent.h>
+#include <unistd.h>
 #include <string>
 #include <map>
 #include <iostream>
@@ -42,6 +44,10 @@
 #include "opencv2/core/core.hpp"
 
 #include "hough.h"
+
+extern FILE *stdin;
+extern FILE *stdout;
+extern FILE *stderr;
 
 std::string img_path;
 int threshold = 0;

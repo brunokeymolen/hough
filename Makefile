@@ -8,6 +8,9 @@ CXXFLAGS=-Wall -I. -I/usr/local/include $(OPTFLAGS)
 CFLAGS=-Wall $(OPTFLAGS)
 LDFLAGS= -L/usr/local/lib $(OPTFLAGS)
 
+#LDFLAGS+= -L/opt/keymolen/opencv/2.4.4/lib
+#CXXFLAGS+= -I/opt/keymolen/opencv/2.4.4/include/
+
 LDFLAGS+= -lopencv_highgui -lopencv_core -lopencv_calib3d -lopencv_features2d -lopencv_flann -lopencv_imgproc -lopencv_objdetect -lopencv_ts
 
 SRC = 	main.o hough.o
@@ -15,7 +18,7 @@ SRC = 	main.o hough.o
 all: hough 
 
 hough: $(SRC) $(MODULES)
-	$(CXX) $(LDFLAGS) $(MODULES) $(SRC) -o hough
+	$(CXX) $(MODULES) $(SRC) $(LDFLAGS) -o hough
 
 %.o: %.c %.h
 	$(CC) $(CFLAGS) -c -o $@ $<
