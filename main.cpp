@@ -63,10 +63,10 @@ void usage(char * s)
 {
 
 	fprintf( stderr, "\n");
-    fprintf( stderr, "%s -s <source file> [-t <threshold>] - hough transform. build: %s-%s \n", s, __DATE__, __TIME__);
+    	fprintf( stderr, "%s -s <source file> [-t <threshold>] - hough transform. build: %s-%s \n", s, __DATE__, __TIME__);
 	fprintf( stderr, "   s: path image file\n");
 	fprintf( stderr, "   t: hough threshold\n");
-	fprintf( stderr, "\nexample: ./hough -s ./img/hangover-0232.jpg -t 80\n");
+	fprintf( stderr, "\nexample:  ./hough -s ./img/russell-crowe-robin-hood-arrow.jpg -t 195\n");
 	fprintf( stderr, "\n");
 }
 
