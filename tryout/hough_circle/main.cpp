@@ -44,6 +44,7 @@
 #include "opencv2/core/core.hpp"
 
 #include "hough.h"
+#include "hough_circle.h"
 
 extern FILE *stdin;
 extern FILE *stdout;
@@ -56,7 +57,27 @@ const char* CW_IMG_ORIGINAL 	= "Result";
 const char* CW_IMG_EDGE		= "Canny Edge Detection";
 const char* CW_ACCUMULATOR  	= "Accumulator";
 
-void doTransform(std::string, int threshold);
+void doTransformCircle(std::string file_path, int threshold);
+
+struct SortCirclesDistance
+{
+    bool operator()( const std::pair< std::pair<int, int>, int>& a, const std::pair< std::pair<int, int>, int>& b )
+    {
+    	//int dist_a = sqrt( pow(a.first.first, 2) + pow(a.first.second, 2));
+    	//int dist_b = sqrt( pow(b.first.first, 2) + pow(b.first.second, 2));
+
+    	int d = sqrt( pow(abs(a.first.first - b.first.first), 2) + pow(abs(a.first.second - b.first.second), 2) );
+    	if(d <= a.second + b.second)
+    	{
+    		//overlap
+    		return a.second > b.second;
+    	}
+   		return false;
+
+//    	return dist_a < dist_b;
+    }
+
+};
 
 
 void usage(char * s)
@@ -104,49 +125,49 @@ int main(int argc, char** argv) {
     cvMoveWindow(CW_IMG_EDGE, 680, 10);
     cvMoveWindow(CW_ACCUMULATOR, 1350, 10);
 
-    doTransform(img_path, threshold);
+    doTransformCircle(img_path, threshold);
 
-	return 0;
+return 0;
 }
 
 
-
-void doTransform(std::string file_path, int threshold)
+void doTransformCircle(std::string file_path, int threshold)
 {
 	cv::Mat img_edge;
 	cv::Mat img_blur;
 
 	cv::Mat img_ori = cv::imread( file_path, 1 );
 	cv::blur( img_ori, img_blur, cv::Size(5,5) );
-	cv::Canny(img_blur, img_edge, 100, 150, 3);
+	cv::Canny(img_blur, img_edge, 175, 200, 3);
 
 	int w = img_edge.cols;
 	int h = img_edge.rows;
 
+
 	//Transform
-	keymolen::Hough hough;
-	hough.Transform(img_edge.data, w, h);
+	keymolen::HoughCircle hough;
 
+	std::vector< std::pair< std::pair<int, int>, int> > circles;
 
+	for(int r=20;r<100/*h/2*/;r=r+5)
+	{
+	hough.Transform(img_edge.data, w, h, r);
+
+	std::cout<< r << " / " << h/2;
 
 	if(threshold == 0)
-		threshold = w>h?w/4:h/4;
+		threshold = 0.95 * (2.0 * (double)r * M_PI);
 
-	while(1)
+//		threshold = 200;
+
+	//while(1)
 	{
-		cv::Mat img_res = img_ori.clone();
 
 		//Search the accumulator
-		std::vector< std::pair< std::pair<int, int>, std::pair<int, int> > > lines = hough.GetLines(threshold);
+		hough.GetCircles(threshold, circles);
 
 		//Draw the results
-		std::vector< std::pair< std::pair<int, int>, std::pair<int, int> > >::iterator it;
-		for(it=lines.begin();it!=lines.end();it++)
-		{
-			cv::line(img_res, cv::Point(it->first.first, it->first.second), cv::Point(it->second.first, it->second.second), cv::Scalar( 0, 0, 255), 2, 8);
-		}
 
-		//Visualize all
 		int aw, ah, maxa;
 		aw = ah = maxa = 0;
 		const unsigned int* accu = hough.GetAccu(&aw, &ah);
@@ -169,17 +190,49 @@ void doTransform(std::string file_path, int threshold)
 		}
 
 
-		cv::imshow(CW_IMG_ORIGINAL, img_res);
+		cv::imshow(CW_IMG_ORIGINAL, img_ori);
 		cv::imshow(CW_IMG_EDGE, img_edge);
 		cv::imshow(CW_ACCUMULATOR, img_accu);
 
-		char c = cv::waitKey(360000);
-		if(c == '+')
-			threshold += 5;
-		if(c == '-')
-			threshold -= 5;
-		if(c == 27)
-			break;
+		cv::waitKey(1);
+
 	}
+	} //r
+
+
+
+	//Filter the results
+	{
+	std::sort(circles.begin(), circles.end(), SortCirclesDistance());
+	int a,b,r;
+	a=b=r=0;
+	std::vector< std::pair< std::pair<int, int>, int> > result;
+	std::vector< std::pair< std::pair<int, int>, int> >::iterator it;
+	for(it=circles.begin();it!=circles.end();it++)
+	{
+		int d = sqrt( pow(abs(it->first.first - a), 2) + pow(abs(it->first.second - b), 2) );
+		if( d > it->second + r)
+		{
+			result.push_back(*it);
+			//ok
+			a = it->first.first;
+			b = it->first.second;
+			r = it->second;
+		}
+	}
+
+	//Visualize all
+	cv::Mat img_res = img_ori.clone();
+	for(it=result.begin();it!=result.end();it++)
+	{
+		std::cout << it->first.first << ", " << it->first.second << std::endl;
+		cv::circle(img_res, cv::Point(it->first.first, it->first.second), it->second, cv::Scalar( 0, 0, 255), 2, 8);
+	}
+	cv::imshow(CW_IMG_ORIGINAL, img_res);
+	cv::imshow(CW_IMG_EDGE, img_edge);
+	//cv::imshow(CW_ACCUMULATOR, img_accu);
+	cv::waitKey(360000);
+	}
+
 }
 
