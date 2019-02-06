@@ -40,4 +40,8 @@ install: all
 	install -d $(PREFIX)/bin
 	install hough  $(PREFIX)/bin
 
+dependencies:
+	sudo apt install libopencv-dev
+
+
 .PHONY: clean all hough install
