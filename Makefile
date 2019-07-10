@@ -4,7 +4,7 @@
 CXX=g++
 CC=gcc
 OPTFLAGS=-g3 -ggdb -O0
-CXXFLAGS=-Wall -I. -I/usr/local/include $(OPTFLAGS)
+CXXFLAGS=-std=c++11 -Wall -I. -I/usr/local/include $(OPTFLAGS)
 CFLAGS=-Wall $(OPTFLAGS)
 LDFLAGS= -L/usr/local/lib $(OPTFLAGS)
 
