@@ -9,10 +9,13 @@ CXXFLAGS=-Wall -I. -I/usr/local/include $(OPTFLAGS)
 CFLAGS=-Wall $(OPTFLAGS)
 LDFLAGS= -L/usr/local/lib $(OPTFLAGS)
 
-LDFLAGS+= -L/opt/keymolen/opencv/2.4.8/lib
-CXXFLAGS+= -I/opt/keymolen/opencv/2.4.8/include/
+#LDFLAGS+= -L/opt/keymolen/opencv/2.4.8/lib
+#CXXFLAGS+= -I/opt/keymolen/opencv/2.4.8/include/
+#LDFLAGS+= -lopencv_highgui -lopencv_core -lopencv_calib3d -lopencv_features2d -lopencv_flann -lopencv_imgproc -lopencv_objdetect -lopencv_ts
 
-LDFLAGS+= -lopencv_highgui -lopencv_core -lopencv_calib3d -lopencv_features2d -lopencv_flann -lopencv_imgproc -lopencv_objdetect -lopencv_ts
+CXXFLAGS+=`pkg-config opencv --cflags`
+LDFLAGS+=`pkg-config opencv --libs`
+
 
 SRC = 	main.o hough.o hough_circle.o
 	
